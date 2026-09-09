@@ -34,10 +34,16 @@ export function Nav() {
       >
         <div
           className={cn(
-            "mx-auto flex h-14 max-w-[1180px] items-center justify-between rounded-2xl px-3 pl-4 transition-all duration-500",
+            "mx-auto flex h-[76px] max-w-[1180px] items-center justify-between rounded-2xl px-3 pl-5 transition-all duration-500",
+            /* The bar is always opaque. The logo art has a near-black ground
+               baked in and relies on mix-blend-mode to drop it, and a blend
+               needs something to blend against: over a transparent bar the
+               fixed header isolates the blend and the ground shows as a black
+               box. An opaque bar also just reads better over the hero. */
+            "bg-[#131313] ring-1 ring-inset ring-white/[0.07]",
             scrolled
-              ? "glass bg-[#131313]/80 shadow-[0_18px_50px_-24px_rgba(0,0,0,0.95)]"
-              : "bg-transparent",
+              ? "shadow-[0_18px_50px_-24px_rgba(0,0,0,0.95)]"
+              : "shadow-none",
           )}
         >
           <Link
@@ -45,7 +51,7 @@ export function Nav() {
             className="flex items-center transition-opacity duration-300 hover:opacity-80"
             aria-label="Vibeployed home"
           >
-            <Logo height={20} />
+            <Logo height={50} />
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
