@@ -1,0 +1,36 @@
+name: Deploy to Firebase Hosting
+
+# Every push to main builds the site and publishes it to vibeployed.com.
+# Requires two repository secrets:
+#   FIREBASE_SERVICE_ACCOUNT  the JSON key for a service account with the
+#                             "Firebase Hosting Admin" role on the project
+#   FIREBASE_PROJECT_ID       the GCP project id
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Type-check and build
+        run: npm run build
+
+      - name: Deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live
