@@ -45,7 +45,7 @@ export function Nav() {
             className="flex items-center transition-opacity duration-300 hover:opacity-80"
             aria-label="Vibeployed home"
           >
-            <Logo className="h-[19px]" />
+            <Logo height={20} />
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
