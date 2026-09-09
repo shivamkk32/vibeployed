@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   Graphite Mono. Source: 21st.dev/community/themes/graphite-mono (serafimcloud)
+
+   A strictly neutral system. Every surface, border and text tone is pure
+   greyscale; the single chromatic exception is `destructive`, reserved for
+   genuine risk. Cards sit DARKER than the page, which is the theme's own
+   depth model, so panels are flat and bordered, never glassy.
+
+   The named ramps below (accent / pass / caution / risk / neutral) exist so
+   components can express meaning. Four of them are luminance bands rather
+   than hues: severity and data series read by brightness, not colour.
+   ========================================================================= */
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Display is the same grotesque, set heavy and very tight. The weight and
+     the negative tracking are what make it read as display rather than body. */
+  --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Theme foreground. Redefining `white` keeps every text-white/xx warm-free
+     and exactly on-theme without touching a single component. */
+  --color-white: oklch(0.985 0 0);
+
+  /* Surfaces, straight from the theme */
+  --color-obsidian: oklch(0.205 0 0);   /* --background  #171717 */
+  --color-pitch: oklch(0.145 0 0);      /* deepest well  #0a0a0a */
+  --color-surface: oklch(0.165 0 0);    /* --card        #131313 */
+  --color-raised: oklch(0.235 0 0);     /* hover / lifted        */
+  --color-hairline: oklch(0.269 0 0);   /* --border      #262626 */
+
+  /* Accent band: brightest. Primary actions and emphasis. */
+  --color-gold-100: oklch(0.985 0 0);
+  --color-gold-200: oklch(0.955 0 0);
+  --color-gold-300: oklch(0.922 0 0);
+  --color-gold-400: oklch(0.88 0 0);
+  --color-gold-500: oklch(0.47 0 0);
+  --color-gold-600: oklch(0.33 0 0);
+
+  /* Pass band */
+  --color-jade-100: oklch(0.94 0 0);
+  --color-jade-200: oklch(0.875 0 0);
+  --color-jade-300: oklch(0.805 0 0);
+  --color-jade-400: oklch(0.745 0 0);
+  --color-jade-500: oklch(0.4 0 0);
+  --color-jade-600: oklch(0.3 0 0);
+
+  /* Caution band */
+  --color-bronze-100: oklch(0.885 0 0);
+  --color-bronze-200: oklch(0.805 0 0);
+  --color-bronze-300: oklch(0.725 0 0);
+  --color-bronze-400: oklch(0.645 0 0);
+  --color-bronze-500: oklch(0.36 0 0);
+  --color-bronze-600: oklch(0.28 0 0);
+
+  /* Risk: the one place chroma is allowed. */
+  --color-clay-100: oklch(0.885 0.055 22.2);
+  --color-clay-200: oklch(0.815 0.105 22.2);
+  --color-clay-300: oklch(0.755 0.15 22.2);
+  --color-clay-400: oklch(0.704 0.191 22.216); /* --destructive */
+  --color-clay-500: oklch(0.45 0.14 22.2);
+  --color-clay-600: oklch(0.34 0.1 22.2);
+
+  /* Neutral text ramp */
+  --color-sand-100: oklch(0.985 0 0);
+  --color-sand-200: oklch(0.9 0 0);
+  --color-sand-300: oklch(0.708 0 0);
+  --color-sand-400: oklch(0.556 0 0);
+  --color-sand-500: oklch(0.439 0 0);
+  --color-sand-600: oklch(0.3 0 0);
+
+  --radius: 1rem;
+
+  /* Motion: long, eased, never bouncy. */
+  --animate-drift: drift 26s ease-in-out infinite;
+  --animate-marquee: marquee 52s linear infinite;
+  --animate-dash: dash 2.6s linear infinite;
+  --animate-blink: blink 1.1s step-end infinite;
+  --animate-sweep: sweep 3.4s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(4%, -5%, 0) scale(1.06); }
+  66% { transform: translate3d(-5%, 3%, 0) scale(0.97); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes dash {
+  to { stroke-dashoffset: -28; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes sweep {
+  0% { transform: translateY(-10%); opacity: 0; }
+  18% { opacity: 1; }
+  82% { opacity: 1; }
+  100% { transform: translateY(560%); opacity: 0; }
+}
+
+:root {
+  color-scheme: dark;
+  --sh-hair: oklch(0.269 0 0);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-obsidian);
+  color: var(--color-sand-100);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: oklch(0.922 0 0);
+  color: oklch(0.165 0 0);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-pitch); }
+::-webkit-scrollbar-thumb {
+  background: oklch(0.32 0 0);
+  border-radius: 99px;
+  border: 2px solid var(--color-pitch);
+}
+::-webkit-scrollbar-thumb:hover { background: oklch(0.42 0 0); }
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  .ring-hairline {
+    box-shadow: inset 0 0 0 1px var(--sh-hair);
+  }
+
+  /* Flat graphite card: darker than the page, crisp 1px border, no gloss. */
+  .glass {
+    background: var(--color-surface);
+    box-shadow:
+      inset 0 0 0 1px var(--color-hairline),
+      0 24px 60px -36px oklch(0 0 0 / 0.9);
+  }
+
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* Emphasis inside a headline. In a mono system that means light, not hue. */
+  .accent-text {
+    color: oklch(0.708 0 0);
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  }
+  .mask-fade-b {
+    mask-image: linear-gradient(180deg, black 55%, transparent);
+  }
+
+  .grid-lines {
+    background-image:
+      linear-gradient(to right, oklch(1 0 0 / 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(1 0 0 / 0.035) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+}
+
+/* --------------------------- number transitions -------------------------- */
+/* NumberFlow renders its own digit stack; keep it aligned to our type. */
+number-flow-react {
+  --number-flow-char-height: 1em;
+  --number-flow-mask-height: 0.3em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------ range input ----------------------------- */
+
+input[type="range"].range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 99px;
+  background: oklch(0.371 0 0);
+  outline: none;
+  cursor: grab;
+}
+input[type="range"].range:active { cursor: grabbing; }
+
+input[type="range"].range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 99px;
+  background: oklch(0.922 0 0);
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 0 0 1px oklch(0.439 0 0);
+  transition: transform 0.22s ease;
+}
+input[type="range"].range::-webkit-slider-thumb:hover { transform: scale(1.12); }
+
+input[type="range"].range::-moz-range-thumb {
+  height: 13px;
+  width: 13px;
+  border-radius: 99px;
+  background: oklch(0.922 0 0);
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 0 0 1px oklch(0.439 0 0);
+}
+input[type="range"].range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px oklch(0.708 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
