@@ -34,7 +34,7 @@ export function Nav() {
       >
         <div
           className={cn(
-            "mx-auto flex h-[76px] max-w-[1180px] items-center justify-between rounded-2xl px-3 pl-5 transition-all duration-500",
+            "mx-auto flex h-[88px] max-w-[1180px] items-center justify-between rounded-2xl px-3 pl-5 transition-all duration-500",
             /* The bar is always opaque. The logo art has a near-black ground
                baked in and relies on mix-blend-mode to drop it, and a blend
                needs something to blend against: over a transparent bar the
@@ -51,7 +51,7 @@ export function Nav() {
             className="flex items-center transition-opacity duration-300 hover:opacity-80"
             aria-label="Vibeployed home"
           >
-            <Logo height={50} />
+            <Logo height={60} />
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">

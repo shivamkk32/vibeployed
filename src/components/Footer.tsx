@@ -52,7 +52,7 @@ export function Footer() {
               className="inline-flex items-center transition-opacity duration-300 hover:opacity-80"
               aria-label="Vibeployed home"
             >
-              <Logo height={64} />
+              <Logo height={76} />
             </Link>
             <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-white/40">
               Deployment infrastructure for people who would rather see the
