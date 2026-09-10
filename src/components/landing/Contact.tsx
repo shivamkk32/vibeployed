@@ -6,7 +6,6 @@ import {
   Clock,
   Loader2,
   Mail,
-  MessageSquare,
   Phone,
 } from "lucide-react";
 import { GithubIcon, LinkedinIcon, XIcon } from "../ui/BrandIcons";
@@ -19,17 +18,10 @@ import { cn } from "../../lib/utils";
 const CHANNELS = [
   {
     icon: Mail,
-    label: "Sales",
-    value: CONTACT.salesEmail,
-    href: `mailto:${CONTACT.salesEmail}`,
-    note: "Pricing, procurement, security reviews",
-  },
-  {
-    icon: MessageSquare,
-    label: "Support",
-    value: CONTACT.supportEmail,
-    href: `mailto:${CONTACT.supportEmail}`,
-    note: "Deployment issues and account help",
+    label: "Email",
+    value: CONTACT.email,
+    href: `mailto:${CONTACT.email}`,
+    note: "Sales, support and security, all read by a person",
   },
   {
     icon: Phone,

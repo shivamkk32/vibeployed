@@ -1,15 +1,13 @@
 /**
  * Contact details shown in the Contact section and the footer.
  *
- * The postal address and phone number are the real ones you supplied. The
- * three email addresses are still placeholders on vibeployed.com: point them at
- * inboxes you actually monitor before this goes public, because a contact
- * page that bounces is worse than no contact page.
+ * One address, used everywhere. There are no mailboxes on vibeployed.com yet,
+ * so pointing sales@ / support@ / security@ at the domain would just bounce.
+ * When domain mail exists, split these out again and update the labels.
  */
 export const CONTACT = {
-  salesEmail: "sales@vibeployed.com",
-  supportEmail: "support@vibeployed.com",
-  securityEmail: "security@vibeployed.com",
+  /** The only address that actually receives mail today. */
+  email: "support.vibeployed@gmail.com",
 
   phone: "+1 508-579-8978",
   phoneHours: "Mon to Fri, 9am to 6pm ET",
@@ -21,7 +19,7 @@ export const CONTACT = {
 
   responseTime: "We answer every message within one business day.",
 
-  github: "https://github.com/vibeployed",
+  github: "https://github.com/shivamkk32/vibeployed",
   twitter: "https://x.com/vibeployed",
   linkedin: "https://www.linkedin.com/company/vibeployed",
 };

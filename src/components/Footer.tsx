@@ -62,11 +62,11 @@ export function Footer() {
             <ul className="mt-6 flex flex-col gap-2.5">
               <li>
                 <a
-                  href={`mailto:${CONTACT.salesEmail}`}
+                  href={`mailto:${CONTACT.email}`}
                   className="flex items-center gap-2.5 text-[13px] text-white/50 transition-colors hover:text-white"
                 >
                   <Mail className="h-3.5 w-3.5 shrink-0 text-white/30" />
-                  {CONTACT.salesEmail}
+                  {CONTACT.email}
                 </a>
               </li>
               <li>
@@ -131,7 +131,7 @@ export function Footer() {
           </p>
           <div className="flex flex-wrap items-center gap-6">
             <a
-              href={`mailto:${CONTACT.securityEmail}`}
+              href={`mailto:${CONTACT.email}`}
               className="text-[12px] text-white/30 transition-colors hover:text-white/70"
             >
               Report a vulnerability
