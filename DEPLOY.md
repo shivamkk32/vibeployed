@@ -44,35 +44,50 @@ this project needs it.
 1. Go to <https://console.firebase.google.com>
 2. Click **Create a project** (or **Add project**)
 3. Project name: `vibeployed`
-   - Below the name Firebase shows a generated **project ID** like
-     `vibeployed-a1b2c`. **Write this down.** It is not the same as the name,
-     it cannot be changed later, and you will need it repeatedly
+   - Below the name Firebase shows the **project ID**. If `vibeployed` is
+     free you get it exactly; otherwise Firebase appends a suffix such as
+     `vibeployed-a1b2c`. **Write down whatever it shows.** It is not
+     necessarily the same as the name, it cannot be changed later, and you
+     will need it repeatedly. You can always read it back off the console
+     URL: `console.firebase.google.com/project/<THIS-BIT>/overview`
 4. **Google Analytics: turn it off.** You do not need it, and it adds a second
    linked account to manage
 5. Click **Create project**, wait, then **Continue**
 
-> **✅ Check:** you land on the project dashboard and the project ID appears
-> in the URL, like `console.firebase.google.com/project/vibeployed-a1b2c`.
+> **✅ Check:** you land on the project dashboard, the project ID appears in
+> the URL, and there is a **Spark plan** badge next to the project name. If it
+> says Blaze, you upgraded by mistake: downgrade under Settings → Usage and
+> billing before going any further.
 
 ---
 
 ## Step 2 · Turn on Hosting
 
-1. Left sidebar → **Build** → **Hosting**
+Left sidebar → **Hosting & Serverless**. That opens a list of four products.
+
+> ⚠️ **Pick `Hosting`, not `App Hosting`.**
+>
+> They are different products with similar names. **App Hosting** is the newer
+> one for server-rendered apps and it **requires the paid Blaze plan** — click
+> it and you will be asked for a card. **Hosting** is the classic static one,
+> free on Spark, and it is what this project uses.
+
+1. **Hosting & Serverless** → **Hosting**
 2. Click **Get started**
 3. It shows CLI instructions (`npm install -g firebase-tools`, `firebase init`
    and so on). **Skip all of it** — click **Next** through the screens and then
    **Continue to console**. The GitHub workflow in this repo does that job
 
-> **✅ Check:** the Hosting page shows a default domain like
-> `vibeployed-a1b2c.web.app`. Your site will appear there before you attach
-> the real domain.
+> **✅ Check:** the Hosting page shows a default domain, which for you will be
+> `vibeployed.web.app`. Your site appears there before you attach the real
+> domain.
 
 ---
 
 ## Step 3 · Create the database
 
-1. Left sidebar → **Build** → **Firestore Database**
+1. Left sidebar → **Databases & Storage** → **Firestore Database**
+   (not Realtime Database, not Data Connect)
 2. Click **Create database**
 3. **Location:** pick a single region near your users, for example
    `us-east1` (South Carolina) or `europe-west1`. Do **not** pick a
@@ -95,10 +110,11 @@ this project needs it.
 
 ## Step 4 · Register the web app and copy its config
 
-1. Click the **gear icon** (top left, beside "Project Overview") →
+1. Left sidebar → **Settings** (the gear, just under Project Overview) →
    **Project settings**
 2. Stay on the **General** tab, scroll to the bottom: **Your apps**
-3. Click the **web icon**, which looks like `</>`
+3. Click the **web icon**, which looks like `</>`. On the project overview
+   page the same thing is behind the **+ Add app** button
 4. App nickname: `vibeployed-web`
 5. **Leave "Also set up Firebase Hosting" unticked** — already done in step 2
 6. Click **Register app**
@@ -108,9 +124,9 @@ It now shows a code block like this:
 ```js
 const firebaseConfig = {
   apiKey: "AIzaSyD-EXAMPLE-xxxxxxxxxxxxxxxxxxxxx",
-  authDomain: "vibeployed-a1b2c.firebaseapp.com",
-  projectId: "vibeployed-a1b2c",
-  storageBucket: "vibeployed-a1b2c.appspot.com",
+  authDomain: "vibeployed.firebaseapp.com",
+  projectId: "vibeployed",
+  storageBucket: "vibeployed.appspot.com",
   messagingSenderId: "123456789012",
   appId: "1:123456789012:web:abc123def456"
 };
@@ -159,7 +175,7 @@ to your project.
 8. **Keys** tab → **Add key** → **Create new key** → **JSON** → **Create**
 
 A `.json` file downloads, probably to your Downloads folder. It looks like
-`vibeployed-a1b2c-1234abcd.json`.
+`vibeployed-1234abcd.json`.
 
 > **✅ Check:** open the file in a text editor. It should contain
 > `"type": "service_account"` and a long `"private_key"`. That is the right
@@ -180,13 +196,13 @@ cd ~/Downloads
 
 gh secret set FIREBASE_SERVICE_ACCOUNT \
   --repo shivamkk32/vibeployed \
-  < vibeployed-a1b2c-1234abcd.json     # your actual filename
+  < vibeployed-1234abcd.json     # your actual filename
 ```
 
 Then **delete the file**:
 
 ```bash
-rm vibeployed-a1b2c-1234abcd.json
+rm vibeployed-1234abcd.json
 ```
 
 If you would rather use the website: repo → **Settings** → **Secrets and
@@ -208,9 +224,9 @@ These are the public ones from step 4. They go in as **variables**, not
 secrets, because the build needs them and they are not sensitive.
 
 ```bash
-gh variable set FIREBASE_PROJECT_ID  --repo shivamkk32/vibeployed --body "vibeployed-a1b2c"
+gh variable set FIREBASE_PROJECT_ID  --repo shivamkk32/vibeployed --body "vibeployed"
 gh variable set FIREBASE_API_KEY     --repo shivamkk32/vibeployed --body "AIzaSyD-EXAMPLE-xxxxx"
-gh variable set FIREBASE_AUTH_DOMAIN --repo shivamkk32/vibeployed --body "vibeployed-a1b2c.firebaseapp.com"
+gh variable set FIREBASE_AUTH_DOMAIN --repo shivamkk32/vibeployed --body "vibeployed.firebaseapp.com"
 gh variable set FIREBASE_APP_ID      --repo shivamkk32/vibeployed --body "1:123456789012:web:abc123def456"
 ```
 
@@ -237,7 +253,7 @@ gh run watch --repo shivamkk32/vibeployed
 things: builds the site, deploys `firestore.rules`, publishes hosting.
 
 > **✅ Check:** the run finishes green, and your site is live at
-> `https://vibeployed-a1b2c.web.app`. Open it. Click through to `/console`,
+> `https://vibeployed.web.app`. Open it. Click through to `/console`,
 > then hit refresh on that page — it should still work, not 404.
 
 Every future push to `main` deploys automatically. You will not run this by
@@ -349,6 +365,10 @@ the project id matches everywhere.
 Hosting did not pick up `firebase.json`. It rewrites unknown paths to
 `index.html`, which is what makes client-side routing survive a refresh.
 
+**Firebase asks for a credit card**
+You clicked **App Hosting** rather than **Hosting**, or a Blaze-only product
+such as Functions. Back out. Nothing in this project needs Blaze.
+
 **Site loads but shows an old version**
 Hard refresh: Ctrl+Shift+R. `index.html` is served `no-cache`, so this should
 be rare.
@@ -395,7 +415,7 @@ to save. `.env.local` is gitignored.
 ```bash
 npm ci && npm run build
 npx firebase-tools login
-npx firebase-tools deploy --project vibeployed-a1b2c
+npx firebase-tools deploy --project vibeployed
 ```
 
 There is intentionally no `.firebaserc`. It previously held a placeholder
