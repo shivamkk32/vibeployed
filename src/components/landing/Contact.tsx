@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowRight,
   Building2,
@@ -51,6 +51,8 @@ const EMPTY = { name: "", email: "", company: "", message: "" };
 
 export function Contact() {
   const [form, setForm] = useState(EMPTY);
+  const startedAt = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
 
@@ -62,7 +64,11 @@ export function Contact() {
     if (status === "sending" || status === "sent") return;
 
     setStatus("sending");
-    const res = await submitContactRequest(form);
+    const res = await submitContactRequest({
+      ...form,
+      website: honeypot,
+      startedAt: startedAt.current,
+    });
 
     if (!res.ok) {
       setError(res.error);
@@ -70,7 +76,7 @@ export function Contact() {
       return;
     }
     if (!res.stored) {
-      setStatus("demo");
+      setStatus(res.reason === "rejected" ? "sent" : "demo");
       return;
     }
     setForm(EMPTY);
@@ -151,7 +157,7 @@ export function Contact() {
           <Reveal delay={0.1}>
             <form
               onSubmit={onSubmit}
-              className="glass flex h-full flex-col rounded-2xl p-6 sm:p-7"
+              className="glass relative flex h-full flex-col rounded-2xl p-6 sm:p-7"
             >
               <h3 className="font-ui text-[16px] font-semibold text-white">
                 Send us a message
@@ -189,6 +195,23 @@ export function Contact() {
                   onChange={(v) => set("company", v)}
                 />
               </div>
+              {/* Honeypot. Hidden from people, irresistible to bots. */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute left-[-9999px] top-0 h-px w-px overflow-hidden opacity-0"
+              >
+                <label htmlFor="website">Website</label>
+                <input
+                  id="website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
+
               <div className="mt-3 flex flex-1 flex-col">
                 <FieldLabel htmlFor="message">Message</FieldLabel>
                 <textarea

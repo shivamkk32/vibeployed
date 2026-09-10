@@ -1,193 +1,178 @@
 # Deploying vibeployed.com
 
-## What this costs
+## The short version: this costs you nothing
 
-**Nothing, at your scale.** The whole thing is designed to sit inside Google's
-free tiers, and it will stay there until the site is genuinely busy.
+**Stay on the Firebase Spark plan and you cannot be charged.** Spark is the
+free tier, it has no billing account attached, and when a quota runs out the
+service simply stops until the next day rather than billing you. Your $10-15
+is never touched, because there is nothing for Google to charge it to.
 
-| Piece | Service | Free allowance | What that means here |
-| --- | --- | --- | --- |
-| The site | Firebase Hosting | 10 GB stored, 360 MB/day transfer | The page is ~250 KB, so roughly 1,400 visits a day before you pay |
-| Form submissions | Cloud Firestore | 1 GiB stored, 20k writes/day, 50k reads/day | A contact form will not get near this |
-| TLS certificate | Firebase Hosting | included | Free, auto-renewing |
-| Custom domain | Firebase Hosting | included | vibeployed.com and www, no charge |
-| CI/CD | GitHub Actions | 2,000 min/month on free accounts | A build is ~2 min |
+That is the whole reason for the architecture. There is no server anywhere:
+static files on a CDN, and the browser writing straight into one Firestore
+collection. Nothing runs when nobody is visiting.
 
-Total: **$0/month.** You still have to attach a billing account to the Google
-Cloud project, but nothing here bills against it at these volumes.
+> **Correcting something I said earlier:** I previously told you a billing
+> account was required. It is not, as long as you stay on Spark and do the
+> setup through the Firebase console. Only the paid Blaze plan needs a card,
+> and you do not need Blaze for any of this.
 
-### What I deliberately did not use, and why
+### What you get free, and what would run out first
 
-| Tempting option | Why not |
-| --- | --- |
-| Cloud Run | Bills per request and needs a container registry. For a static site it buys nothing, and a custom domain wants a load balancer at roughly $18/month |
-| Cloud SQL | Cheapest instance is about $9/month, running whether anyone visits or not |
-| Cloud Functions | Requires the paid Blaze plan. The browser can write to Firestore directly, so there is nothing for a function to do |
-| App Engine | Always-on instance hours you do not need |
+| Piece | Free allowance | What that means here |
+| --- | --- | --- |
+| Firebase Hosting | 10 GB stored, **360 MB/day** transfer | Page weighs ~193 KB, so roughly **1,800 visits a day** |
+| Cloud Firestore | 1 GiB stored, **20k writes/day** | The contact form will not get close |
+| TLS certificate | included | Free, auto-renewing |
+| Custom domain | included | vibeployed.com and www, no charge |
+| GitHub Actions | 2,000 min/month, and **unlimited on public repos** | Your repo is public, so builds are free |
 
-The architecture is: **static files on a CDN, plus one Firestore collection
-the browser writes to directly.** No server exists, so there is no server to
-pay for.
+The first thing you would exhaust is hosting transfer, at around 1,800 visits
+a day. If you ever get there, put Cloudflare's free tier in front and the
+problem disappears.
 
----
+### What I deliberately avoided, and what it would have cost you
 
-## What I need from you
+| Tempting option | Monthly cost | Why not |
+| --- | --- | --- |
+| Cloud Run | ~$5-15 + registry | Bills per request; a custom domain wants a load balancer at ~$18 |
+| Cloud SQL | **~$9 minimum** | Runs whether anyone visits or not. Would eat your whole budget |
+| Cloud Functions | needs Blaze | The browser writes to Firestore directly, so there is nothing for it to do |
+| App Engine | instance hours | Always-on capacity you do not need |
 
-1. **A GCP project ID.** Either an existing one or a new name, for example
-   `vibeployed-prod`.
-2. **A billing account attached to it.** Free tiers still require one on file.
-   You will not be charged at these volumes, but set a budget alert anyway
-   (step 7).
-3. **Access to your domain's DNS** at whichever registrar you bought
-   vibeployed.com from, to add two records.
-4. **Either** `gcloud` installed here so I can run all of this for you, **or**
-   you run the steps below yourself. I cannot authenticate to Google from this
-   machine: `gcloud` is not installed, and its sign-in needs a browser.
+Any one of those would have spent your budget every month, forever, for a site
+that gets no traffic yet.
 
 ---
 
-## 1. Create the project
+## Setup: all in the browser, no gcloud needed
 
-```bash
-gcloud projects create YOUR_PROJECT_ID --name="Vibeployed"
-gcloud config set project YOUR_PROJECT_ID
-```
+You do not need the Google Cloud SDK installed for any of this.
 
-Attach billing in the console, then:
+### 1. Create the project
 
-```bash
-gcloud services enable \
-  firebase.googleapis.com \
-  firebasehosting.googleapis.com \
-  firestore.googleapis.com \
-  firebaserules.googleapis.com
-```
+<https://console.firebase.google.com> → **Add project** → name it
+`vibeployed` → you can turn Google Analytics off.
 
-## 2. Add Firebase and create the database
+When asked about a plan, **stay on Spark**. Do not upgrade to Blaze.
 
-At <https://console.firebase.google.com> choose **Add project**, pick the
-existing GCP project, and enable **Hosting**.
+### 2. Turn on Hosting
 
-Then **Build → Firestore Database → Create database**:
+**Build → Hosting → Get started.** You can skip the CLI instructions it shows;
+the GitHub workflow in this repo does that part.
 
-- **Start in production mode.** Not test mode: test mode leaves the database
-  open to the world for 30 days.
-- Pick a location near your users. `nam5` (US) or `eur3` (Europe) are the
-  multi-region options; a single region such as `us-east1` is cheaper and
-  plenty for this.
+### 3. Create the database
 
-The rules in `firestore.rules` are deployed by CI and will replace the
-default locked-down rules with "anyone may submit the form, nobody may read".
+**Build → Firestore Database → Create database.**
 
-## 3. Register a web app
+> ⚠️ Choose **Production mode**, not test mode. Test mode leaves your database
+> open to the entire internet for 30 days.
 
-Firebase console → **Project settings → General → Your apps → Web**. Copy the
-config values. You need four of them:
+Pick a single region such as `us-east1` rather than a multi-region: cheaper,
+and stays inside the free tier. `firestore.rules` in this repo replaces the
+locked-down defaults on the first deploy with "anyone may submit the form,
+nobody may read it".
 
-```
-apiKey, authDomain, projectId, appId
-```
+### 4. Register a web app
+
+**Project settings → General → Your apps → Web (`</>`)**. Nickname it
+`vibeployed-web`. Copy the config block it shows you.
+
+You need four values: `apiKey`, `authDomain`, `projectId`, `appId`.
 
 **These are not secrets.** Firebase web config is public by design and ships
-inside the JavaScript bundle. What protects the database is `firestore.rules`,
-which allows `create` on `contactRequests` and denies every read. Do not go
-looking for a way to hide them.
+inside the JavaScript bundle. What protects your database is
+`firestore.rules`, which permits `create` on `contactRequests` and denies
+every read. Do not go looking for a way to hide them.
 
-## 4. Create a deploy service account
+### 5. Create the deploy credential
 
-```bash
-gcloud iam service-accounts create github-deployer \
-  --display-name="GitHub Actions deployer"
+<https://console.cloud.google.com/iam-admin/serviceaccounts> (same project)
 
-for ROLE in roles/firebasehosting.admin roles/firebaserules.admin; do
-  gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-    --member="serviceAccount:github-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
-    --role="$ROLE"
-done
+1. **Create service account**, name it `github-deployer`
+2. Grant it two roles: **Firebase Hosting Admin** and **Firebase Rules Admin**
+3. Open it → **Keys → Add key → Create new key → JSON**. It downloads a file.
 
-gcloud iam service-accounts keys create key.json \
-  --iam-account="github-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com"
-```
+### 6. Give GitHub the config
 
-## 5. Give GitHub the config
+In a terminal, from the folder where that JSON landed:
 
 ```bash
-# Secret: the deploy credential.
-gh secret set FIREBASE_SERVICE_ACCOUNT --repo shivamkk32/vibeployed < key.json
-rm key.json          # delete it, it is a long-lived credential
-
-# Variables: public Firebase web config, baked into the build.
-gh variable set FIREBASE_PROJECT_ID   --repo shivamkk32/vibeployed --body "YOUR_PROJECT_ID"
-gh variable set FIREBASE_API_KEY      --repo shivamkk32/vibeployed --body "AIza..."
-gh variable set FIREBASE_AUTH_DOMAIN  --repo shivamkk32/vibeployed --body "YOUR_PROJECT_ID.firebaseapp.com"
-gh variable set FIREBASE_APP_ID       --repo shivamkk32/vibeployed --body "1:...:web:..."
+gh secret set FIREBASE_SERVICE_ACCOUNT --repo shivamkk32/vibeployed < the-downloaded-file.json
 ```
 
-## 6. Deploy
+Then delete the downloaded file. It is a long-lived credential.
+
+Send me the four values from step 4 and I will set the rest, or do it
+yourself:
+
+```bash
+gh variable set FIREBASE_PROJECT_ID  --repo shivamkk32/vibeployed --body "your-project-id"
+gh variable set FIREBASE_API_KEY     --repo shivamkk32/vibeployed --body "AIza..."
+gh variable set FIREBASE_AUTH_DOMAIN --repo shivamkk32/vibeployed --body "your-project-id.firebaseapp.com"
+gh variable set FIREBASE_APP_ID      --repo shivamkk32/vibeployed --body "1:...:web:..."
+```
+
+### 7. Deploy
 
 ```bash
 gh workflow run deploy.yml --repo shivamkk32/vibeployed
 gh run watch --repo shivamkk32/vibeployed
 ```
 
-The workflow builds the site, deploys `firestore.rules`, then publishes
-hosting. Every later push to `main` repeats it.
+The workflow builds, deploys `firestore.rules`, then publishes hosting. Every
+later push to `main` repeats it. Until step 6 is done the workflow fails on
+every push, which is expected and costs nothing.
 
-## 7. Put a budget alert on it
+### 8. Attach the domain
 
-Cheap insurance against a surprise, which is rather the point of this product:
-
-```bash
-gcloud billing budgets create \
-  --billing-account=YOUR_BILLING_ACCOUNT_ID \
-  --display-name="Vibeployed" \
-  --budget-amount=5USD \
-  --threshold-rule=percent=50 \
-  --threshold-rule=percent=100
-```
-
-## 8. Attach the domain
-
-Firebase console → **Hosting → Add custom domain** → `vibeployed.com`, and
+Firebase console → **Hosting → Add custom domain** → `vibeployed.com`, then
 again for `www.vibeployed.com`. Firebase shows the DNS records to add at your
-registrar: normally two `A` records for the apex and a `CNAME` for `www`.
-The certificate is issued automatically and can take up to about an hour.
+registrar: normally two `A` records for the apex and a `CNAME` for `www`. The
+certificate is issued automatically and can take up to about an hour.
 
 ---
 
 ## Reading the submissions
 
-Firebase console → **Firestore Database → contactRequests**. Each document
-holds `name`, `email`, `company`, `message`, `createdAt`, plus `referrer` and
+Firebase console → **Firestore Database → contactRequests**. Each document has
+`name`, `email`, `company`, `message`, `createdAt`, plus `referrer` and
 `userAgent` for triage.
 
-Rules deny reads from the browser, so the console and service accounts are the
-only ways in. That is deliberate: a public form collection that anyone can
-read is a data leak.
+The rules deny reads from the browser, so the console is the only way in. That
+is deliberate: a public form collection anyone can read is a data leak.
 
-### Getting an email when someone submits
+### Email notification when someone submits
 
-Not included, because every option costs something:
+Not included, because it is the one thing here that would cost money. A
+Firestore trigger needs Cloud Functions, which needs Blaze. At your volume
+Blaze would bill about $0, but it needs a card on file and can in principle
+charge you, so it is your call rather than mine.
 
-- A Firestore trigger needs Cloud Functions, which needs the **Blaze** plan.
-  At this volume Blaze would still bill about $0, but it needs a card and can
-  in principle charge you.
-- The **Trigger Email from Firestore** extension is the least work, and needs
-  Blaze plus an SMTP provider such as Brevo, whose free tier covers 300
-  emails a day.
+Free alternative if you want alerts now: check the Firebase console, or add
+the address to a phone bookmark. For a site with no traffic yet that is
+genuinely fine.
 
-Until then, check the console. For a site with no traffic yet, that is fine.
+## Spam, and why it matters on a free tier
 
-## Spam
+The only way this ever costs you anything is somebody hammering the form and
+burning through the write quota. Three defences, all already in place and all
+free:
 
-The form is public, so it will eventually get bot submissions. In order of
-cost:
+1. **`firestore.rules`** rejects anything malformed, oversized, carrying
+   unexpected fields, or with a client-supplied timestamp.
+2. **A honeypot field** that humans never see and bots fill in. Filled means
+   the submission is dropped before it is written, and the bot is told it
+   succeeded so it does not learn.
+3. **A timing trap and a throttle**: submissions faster than 3 seconds after
+   the form loads are refused, and one submission per browser per minute.
 
-1. **Free, already done.** `firestore.rules` rejects anything malformed,
-   oversized or with unexpected fields.
-2. **Free.** Firebase **App Check** with reCAPTCHA v3 blocks traffic that is
-   not from your real site. Worth turning on the day you get your first spam.
-3. **Costs money.** A Cloud Function doing content filtering. Not worth it.
+Those last two are client-side and a determined script can skip them. They
+exist to stop casual spam eating quota, not as security. The rules are the
+security.
+
+If you ever do get hit properly, turn on **Firebase App Check** with
+reCAPTCHA v3. It is free on Spark and blocks traffic that is not from your
+real site.
 
 ## Local development
 
@@ -204,8 +189,13 @@ to save.
 ```bash
 npm ci && npm run build
 npx firebase-tools login
-npx firebase-tools deploy --project YOUR_PROJECT_ID
+npx firebase-tools deploy --project your-project-id
 ```
+
+There is deliberately no `.firebaserc` in the repo: it only ever held a
+placeholder project id, and the CLI silently preferred it over the real one,
+which is what made the first deploys fail. The project is passed explicitly
+instead, from `FIREBASE_PROJECT_ID` in CI or `--project` locally.
 
 ## Why the rewrite in firebase.json matters
 

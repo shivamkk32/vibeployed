@@ -1,5 +1,5 @@
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -132,24 +132,31 @@ export function Hero() {
   );
 }
 
+/*
+ * Each word gets its own clipping box so it can slide up from underneath.
+ *
+ * The gap between words is a real space character sitting between those
+ * boxes, not a margin. A margin looks identical but leaves the text content
+ * as "Shiptoanycloud." with no word boundaries, which is what a screen reader
+ * announces and what a search engine indexes.
+ */
 function Words({ words, delay = 0 }: { words: string[]; delay?: number }) {
   return (
     <>
       {words.map((w, i) => (
-        <span
-          key={`${w}-${i}`}
-          className="inline-block overflow-hidden pb-[0.06em] align-bottom"
-          style={{ marginRight: i < words.length - 1 ? "0.22em" : undefined }}
-        >
-          <motion.span
-            className="inline-block"
-            initial={{ y: "112%" }}
-            animate={{ y: "0%" }}
-            transition={{ duration: 1, delay: delay + i * 0.06, ease: EASE }}
-          >
-            {w}
-          </motion.span>
-        </span>
+        <Fragment key={`${w}-${i}`}>
+          <span className="inline-block overflow-hidden pb-[0.06em] align-bottom">
+            <motion.span
+              className="inline-block"
+              initial={{ y: "112%" }}
+              animate={{ y: "0%" }}
+              transition={{ duration: 1, delay: delay + i * 0.06, ease: EASE }}
+            >
+              {w}
+            </motion.span>
+          </span>
+          {i < words.length - 1 ? " " : null}
+        </Fragment>
       ))}
     </>
   );

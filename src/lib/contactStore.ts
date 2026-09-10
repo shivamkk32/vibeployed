@@ -20,11 +20,15 @@ export type ContactRequest = {
   email: string;
   company: string;
   message: string;
+  /** Hidden honeypot. Humans leave it empty; bots fill every field. */
+  website?: string;
+  /** When the form was mounted, used to catch instant bot submissions. */
+  startedAt?: number;
 };
 
 export type SubmitResult =
   | { ok: true; stored: true }
-  | { ok: true; stored: false; reason: "not-configured" }
+  | { ok: true; stored: false; reason: "not-configured" | "rejected" }
   | { ok: false; error: string };
 
 const cfg = {
@@ -36,14 +40,57 @@ const cfg = {
 
 export const isConfigured = Boolean(cfg.apiKey && cfg.projectId && cfg.appId);
 
-/** Trim and cap everything before it leaves the browser. */
+/** One submission per minute per browser. */
+const THROTTLE_MS = 60_000;
+/** A human takes longer than this to fill in four fields. */
+const MIN_FILL_MS = 3_000;
+const THROTTLE_KEY = "vp:lastContactSubmit";
+
 function clean(v: string, max: number) {
   return v.trim().slice(0, max);
+}
+
+function lastSubmitAt(): number {
+  try {
+    return Number(localStorage.getItem(THROTTLE_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function markSubmitted() {
+  try {
+    localStorage.setItem(THROTTLE_KEY, String(Date.now()));
+  } catch {
+    /* private mode: throttling is a nicety, not a control */
+  }
 }
 
 export async function submitContactRequest(
   input: ContactRequest,
 ): Promise<SubmitResult> {
+  /*
+   * Three cheap bot filters before anything is written. None of them are
+   * security, since a determined script can skip the page entirely. They
+   * exist to keep casual spam from eating the free Firestore write quota,
+   * which is the only thing here that could ever cost money. The real
+   * controls are in firestore.rules.
+   */
+  if (input.website && input.website.trim()) {
+    // Honeypot filled. Report success so the bot does not learn anything.
+    return { ok: true, stored: false, reason: "rejected" };
+  }
+
+  if (input.startedAt && Date.now() - input.startedAt < MIN_FILL_MS) {
+    return { ok: false, error: "That was too quick. Give it another go." };
+  }
+
+  const since = Date.now() - lastSubmitAt();
+  if (since < THROTTLE_MS) {
+    const wait = Math.ceil((THROTTLE_MS - since) / 1000);
+    return { ok: false, error: `Please wait ${wait}s before sending again.` };
+  }
+
   const payload = {
     name: clean(input.name, 120),
     email: clean(input.email, 200),
@@ -76,6 +123,7 @@ export async function submitContactRequest(
       userAgent: navigator.userAgent.slice(0, 300),
     });
 
+    markSubmitted();
     return { ok: true, stored: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
