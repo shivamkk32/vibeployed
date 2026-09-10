@@ -1,16 +1,17 @@
-import { motion } from "framer-motion";
 import { useState } from "react";
 import {
   ArrowRight,
   Building2,
   Check,
   Clock,
+  Loader2,
   Mail,
   MessageSquare,
   Phone,
 } from "lucide-react";
 import { GithubIcon, LinkedinIcon, XIcon } from "../ui/BrandIcons";
 import { CONTACT } from "../../lib/contact";
+import { submitContactRequest } from "../../lib/contactStore";
 import { Button, Container, SectionHeading } from "../ui/Kit";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 import { cn } from "../../lib/utils";
@@ -52,8 +53,46 @@ const SOCIALS = [
   { icon: LinkedinIcon, label: "LinkedIn", href: CONTACT.linkedin },
 ];
 
+type Status = "idle" | "sending" | "sent" | "demo" | "error";
+
+const EMPTY = { name: "", email: "", company: "", message: "" };
+
 export function Contact() {
-  const [sent, setSent] = useState(false);
+  const [form, setForm] = useState(EMPTY);
+  const [status, setStatus] = useState<Status>("idle");
+  const [error, setError] = useState("");
+
+  const set = (k: keyof typeof EMPTY, v: string) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (status === "sending" || status === "sent") return;
+
+    setStatus("sending");
+    const res = await submitContactRequest(form);
+
+    if (!res.ok) {
+      setError(res.error);
+      setStatus("error");
+      return;
+    }
+    if (!res.stored) {
+      setStatus("demo");
+      return;
+    }
+    setForm(EMPTY);
+    setStatus("sent");
+  }
+
+  const note =
+    status === "sent"
+      ? `Thank you. ${CONTACT.responseTime}`
+      : status === "demo"
+        ? "Saved nowhere yet: this build has no Firebase config, so the form is still in demo mode."
+        : status === "error"
+          ? `That did not send: ${error}`
+          : "We reply from a real address. No sequences, no drip campaign.";
 
   return (
     <section id="contact" className="relative scroll-mt-24 py-28 sm:py-32">
@@ -119,10 +158,7 @@ export function Contact() {
           {/* -------------------------------- form ------------------------------- */}
           <Reveal delay={0.1}>
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSent(true);
-              }}
+              onSubmit={onSubmit}
               className="glass flex h-full flex-col rounded-2xl p-6 sm:p-7"
             >
               <h3 className="font-ui text-[16px] font-semibold text-white">
@@ -134,17 +170,32 @@ export function Contact() {
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <Input label="Name" name="name" placeholder="Ada Lovelace" required />
+                <Input
+                  label="Name"
+                  name="name"
+                  placeholder="Ada Lovelace"
+                  required
+                  value={form.name}
+                  onChange={(v) => set("name", v)}
+                />
                 <Input
                   label="Work email"
                   name="email"
                   type="email"
                   placeholder="ada@company.com"
                   required
+                  value={form.email}
+                  onChange={(v) => set("email", v)}
                 />
               </div>
               <div className="mt-3">
-                <Input label="Company" name="company" placeholder="Acme Inc." />
+                <Input
+                  label="Company"
+                  name="company"
+                  placeholder="Acme Inc."
+                  value={form.company}
+                  onChange={(v) => set("company", v)}
+                />
               </div>
               <div className="mt-3 flex flex-1 flex-col">
                 <FieldLabel htmlFor="message">Message</FieldLabel>
@@ -153,6 +204,8 @@ export function Contact() {
                   name="message"
                   rows={4}
                   required
+                  value={form.message}
+                  onChange={(e) => set("message", e.target.value)}
                   placeholder="We run a Django monolith on two EC2 boxes and want it containerised without downtime…"
                   className="min-h-[104px] flex-1 resize-y rounded-xl bg-white/[0.03] px-3.5 py-3 text-[13.5px] text-white outline-none ring-1 ring-inset ring-white/10 transition-colors placeholder:text-white/25 focus:ring-white/35"
                 />
@@ -161,26 +214,32 @@ export function Contact() {
               <Button
                 type="submit"
                 className="mt-5 w-full"
-                disabled={sent}
+                disabled={status === "sending" || status === "sent"}
                 icon={
-                  sent ? (
+                  status === "sending" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : status === "sent" ? (
                     <Check className="h-4 w-4" />
                   ) : (
                     <ArrowRight className="h-4 w-4" />
                   )
                 }
               >
-                {sent ? "Message noted" : "Send message"}
+                {status === "sending"
+                  ? "Sending"
+                  : status === "sent"
+                    ? "Message sent"
+                    : "Send message"}
               </Button>
 
-              <motion.p
-                animate={{ opacity: 1 }}
-                className="mt-3 text-center text-[11.5px] leading-relaxed text-white/30"
+              <p
+                className={cn(
+                  "mt-3 text-center text-[11.5px] leading-relaxed",
+                  status === "error" ? "text-clay-300" : "text-white/30",
+                )}
               >
-                {sent
-                  ? "This demo does not submit anywhere. Wire the form to your own inbox or CRM before launch."
-                  : "We reply from a real address. No sequences, no drip campaign."}
-              </motion.p>
+                {note}
+              </p>
             </form>
           </Reveal>
         </div>
@@ -215,6 +274,8 @@ function Input({
   placeholder,
   required,
   className,
+  value,
+  onChange,
 }: {
   label: string;
   name: string;
@@ -222,6 +283,8 @@ function Input({
   placeholder?: string;
   required?: boolean;
   className?: string;
+  value?: string;
+  onChange?: (v: string) => void;
 }) {
   return (
     <div className={cn("flex flex-col", className)}>
@@ -232,6 +295,8 @@ function Input({
         type={type}
         required={required}
         placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
         className="h-11 rounded-xl bg-white/[0.03] px-3.5 text-[13.5px] text-white outline-none ring-1 ring-inset ring-white/10 transition-colors placeholder:text-white/25 focus:ring-white/35"
       />
     </div>

@@ -1,0 +1,66 @@
+rules_version = '2';
+
+// The site is static and has no backend, so the browser writes contact form
+// submissions straight into Firestore. These rules are therefore the only
+// thing standing between the form and the database, and they are written to
+// be deny-by-default:
+//
+//   - anyone may CREATE a contact request, because the form is public
+//   - nobody may READ, UPDATE or DELETE from a client, ever. Submissions are
+//     read in the Firebase console or by a service account
+//   - every other path in the database is closed
+//
+// The shape is validated here rather than only in the browser, because
+// client-side validation is a convenience, not a control: anyone can post
+// straight to the API with the public web config.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /contactRequests/{id} {
+      allow create: if
+        // No unexpected fields, and the required ones are all present.
+        request.resource.data.keys().hasOnly(
+          ['name', 'email', 'company', 'message', 'createdAt', 'referrer', 'userAgent']
+        )
+        && request.resource.data.keys().hasAll(
+          ['name', 'email', 'message', 'createdAt']
+        )
+
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 120
+
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 4000
+
+        && (!('company' in request.resource.data)
+            || (request.resource.data.company is string
+                && request.resource.data.company.size() <= 160))
+
+        && (!('referrer' in request.resource.data)
+            || request.resource.data.referrer == null
+            || (request.resource.data.referrer is string
+                && request.resource.data.referrer.size() <= 300))
+
+        && (!('userAgent' in request.resource.data)
+            || (request.resource.data.userAgent is string
+                && request.resource.data.userAgent.size() <= 300))
+
+        // Must be the server's clock, so submissions cannot be backdated.
+        && request.resource.data.createdAt == request.time;
+
+      allow read, update, delete: if false;
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

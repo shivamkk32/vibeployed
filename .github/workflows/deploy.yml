@@ -1,10 +1,19 @@
 name: Deploy to Firebase Hosting
 
 # Every push to main builds the site and publishes it to vibeployed.com.
-# Requires two repository secrets:
-#   FIREBASE_SERVICE_ACCOUNT  the JSON key for a service account with the
-#                             "Firebase Hosting Admin" role on the project
-#   FIREBASE_PROJECT_ID       the GCP project id
+#
+# Repository SECRETS required:
+#   FIREBASE_SERVICE_ACCOUNT   JSON key for a service account holding the
+#                              "Firebase Hosting Admin" and
+#                              "Firebase Rules Admin" roles
+#
+# Repository VARIABLES required (these are not secrets: Firebase web config is
+# public by design and ships in the bundle. The database is protected by
+# firestore.rules, not by hiding these):
+#   FIREBASE_PROJECT_ID
+#   FIREBASE_API_KEY
+#   FIREBASE_AUTH_DOMAIN
+#   FIREBASE_APP_ID
 on:
   push:
     branches: [main]
@@ -25,12 +34,31 @@ jobs:
         run: npm ci
 
       - name: Type-check and build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.FIREBASE_APP_ID }}
         run: npm run build
 
-      - name: Deploy
+      # Rules are the only thing protecting the database, so they ship with
+      # every deploy rather than being applied by hand and drifting.
+      - name: Write service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$RUNNER_TEMP/sa.json"
+
+      - name: Deploy Firestore rules
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: npx --yes firebase-tools@13 deploy --only firestore:rules --project "${{ vars.FIREBASE_PROJECT_ID }}" --non-interactive
+
+      - name: Deploy hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          projectId: ${{ vars.FIREBASE_PROJECT_ID }}
           channelId: live
+
+      - name: Remove service account key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"
