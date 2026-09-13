@@ -66,6 +66,28 @@ function markSubmitted() {
   }
 }
 
+let warming: Promise<unknown> | null = null;
+
+/**
+ * Start fetching the Firebase SDK in the background.
+ *
+ * The SDK is a ~160 KB gzipped chunk that is deliberately kept out of the
+ * initial page load, but that meant the first submit paid ~4s to download it
+ * while the button sat on "Sending". Calling this when someone starts filling
+ * the form moves that download into the time they spend typing, so the send
+ * itself is near-instant. Safe to call repeatedly; it only ever runs once.
+ */
+export function warmUpContactStore() {
+  if (!isConfigured || warming) return;
+  warming = Promise.all([
+    import("firebase/app"),
+    import("firebase/firestore"),
+  ]).catch(() => {
+    // A failed prefetch is not an error: submit will retry and report properly.
+    warming = null;
+  });
+}
+
 export async function submitContactRequest(
   input: ContactRequest,
 ): Promise<SubmitResult> {

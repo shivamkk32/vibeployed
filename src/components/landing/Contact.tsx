@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { GithubIcon, LinkedinIcon, XIcon } from "../ui/BrandIcons";
 import { CONTACT } from "../../lib/contact";
-import { submitContactRequest } from "../../lib/contactStore";
+import { submitContactRequest, warmUpContactStore } from "../../lib/contactStore";
 import { Button, Container, SectionHeading } from "../ui/Kit";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 import { cn } from "../../lib/utils";
@@ -172,6 +172,8 @@ export function Contact() {
           <Reveal delay={0.1}>
             <form
               onSubmit={onSubmit}
+              /* Fetch the SDK while they type rather than after they click. */
+              onFocusCapture={warmUpContactStore}
               className="glass relative flex h-full flex-col rounded-2xl p-6 sm:p-7"
             >
               <h3 className="font-ui text-[16px] font-semibold text-white">
