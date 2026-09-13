@@ -14,8 +14,19 @@ import { StepQuestions } from "../components/console/StepQuestions";
 import { StepDesign } from "../components/console/StepDesign";
 import { StepDeploy } from "../components/console/StepDeploy";
 import { pageTransition } from "../components/ui/ScrollToTop";
+import { useSeo } from "../lib/useSeo";
 
 export function Console() {
+  /* Without its own canonical this page inherited the homepage's, which told
+     search engines /console was a duplicate of / and kept it out of the index
+     entirely. It is the page people are actually sent to, so it needs to rank. */
+  useSeo({
+    title: "Live demo · Walk a deployment end to end · Vibeployed",
+    description:
+      "Run the full Vibeployed flow in your browser: connect a repo, pick a cloud, scan the code, answer the scaling questions, review the architecture and the cost, then approve. No account, no cloud credentials.",
+    path: "/console",
+  });
+
   const [run, setRun] = useState<RunState>(INITIAL_RUN);
   const [step, setStep] = useState(0);
   const [furthest, setFurthest] = useState(0);

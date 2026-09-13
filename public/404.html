@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#171717" />
+    <title>Page not found · Vibeployed</title>
+    <link rel="icon" type="image/png" href="/vibeployed-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..900&display=swap"
+      rel="stylesheet"
+    />
+    <!--
+      Served by Firebase with a real 404 status for any path that does not
+      match a rewrite in firebase.json. Standalone on purpose: pulling in the
+      React bundle to say "not found" would cost a visitor ~190 KB to be told
+      the page is missing.
+    -->
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        background: oklch(0.205 0 0);
+        color: oklch(0.985 0 0);
+        font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-align: center;
+      }
+      .wrap { max-width: 34rem; }
+      .logo { width: 148px; height: auto; opacity: 0.9; margin-bottom: 2.5rem; }
+      .code {
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        font-size: 13px;
+        letter-spacing: 0.2em;
+        color: oklch(0.556 0 0);
+        margin: 0 0 1.25rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 6vw, 3rem);
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 1.05;
+      }
+      p {
+        margin: 1.25rem auto 0;
+        max-width: 26rem;
+        font-size: 16px;
+        line-height: 1.65;
+        color: oklch(0.708 0 0);
+      }
+      .actions {
+        margin-top: 2.5rem;
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        height: 52px;
+        padding: 0 1.75rem;
+        border-radius: 999px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        text-decoration: none;
+        transition: filter 0.3s ease, background-color 0.3s ease;
+      }
+      a.primary { background: oklch(0.922 0 0); color: oklch(0.165 0 0); }
+      a.primary:hover { filter: brightness(1.07); }
+      a.ghost {
+        color: oklch(0.9 0 0);
+        background: oklch(1 0 0 / 0.04);
+        box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.1);
+      }
+      a.ghost:hover { background: oklch(1 0 0 / 0.08); }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <img
+        class="logo"
+        src="/vibeployed-logo.png"
+        alt="Vibeployed"
+        width="500"
+        height="500"
+        style="object-fit: cover; object-position: center; height: 52px; mix-blend-mode: screen"
+      />
+      <p class="code">404</p>
+      <h1>That page does not exist.</h1>
+      <p>
+        The link may be out of date, or the address mistyped. Nothing is broken
+        on your side.
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="/">Back to the homepage</a>
+        <a class="btn ghost" href="/console">Try the live demo</a>
+      </div>
+    </main>
+  </body>
+</html>

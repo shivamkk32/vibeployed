@@ -54,6 +54,98 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..900&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+
+    <!--
+      Structured data. Static on purpose: this is the one block crawlers must
+      see without executing JavaScript, and these three entities never change
+      per route. The FAQ schema is generated from src/lib/data.ts instead, so
+      the questions on the page and the questions in the markup cannot drift.
+
+      @id values are stable URIs so the graph nodes can reference each other.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://vibeployed.com/#organization",
+            "name": "Vibeployed",
+            "url": "https://vibeployed.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://vibeployed.com/vibeployed-logo.png"
+            },
+            "description": "Vibeployed reads your code, designs the cloud architecture, and shows you the diagram and the monthly bill before a single resource exists.",
+            "email": "support.vibeployed@gmail.com",
+            "telephone": "+1-508-579-8978",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "8457 Reformatory Way",
+              "addressLocality": "Lorton",
+              "addressRegion": "VA",
+              "postalCode": "22079",
+              "addressCountry": "US"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "support.vibeployed@gmail.com",
+              "telephone": "+1-508-579-8978",
+              "availableLanguage": "English"
+            },
+            "sameAs": [
+              "https://github.com/shivamkk32/vibeployed",
+              "https://x.com/vibeployed",
+              "https://www.linkedin.com/company/vibeployed"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://vibeployed.com/#website",
+            "url": "https://vibeployed.com/",
+            "name": "Vibeployed",
+            "inLanguage": "en-US",
+            "publisher": { "@id": "https://vibeployed.com/#organization" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://vibeployed.com/#software",
+            "name": "Vibeployed",
+            "url": "https://vibeployed.com/",
+            "applicationCategory": "DeveloperApplication",
+            "applicationSubCategory": "Cloud deployment automation",
+            "operatingSystem": "Web browser",
+            "description": "Connect a repository and a cloud account. Vibeployed scans the code, designs the architecture, estimates the monthly cost, and deploys to AWS, Google Cloud or Azure only after you approve the plan.",
+            "featureList": [
+              "Automated source code and dependency scanning",
+              "High-level and low-level architecture diagrams",
+              "Monthly cloud cost estimates before provisioning",
+              "Auto, Manual and Audit deployment modes",
+              "Terraform and Pulumi export",
+              "Transactional rollback on failed stages"
+            ],
+            "publisher": { "@id": "https://vibeployed.com/#organization" },
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "Solo",
+                "price": "0",
+                "priceCurrency": "USD",
+                "description": "One connected cloud account, three deployments a month."
+              },
+              {
+                "@type": "Offer",
+                "name": "Team",
+                "price": "49",
+                "priceCurrency": "USD",
+                "description": "Unlimited cloud accounts and deployments, billed monthly."
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

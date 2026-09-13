@@ -82,9 +82,9 @@ export function Architecture() {
                 className="rounded-2xl bg-white/[0.025] p-5 ring-hairline"
               >
                 <c.icon className="h-4 w-4 text-white/70" />
-                <h4 className="mt-3.5 font-ui text-[14px] font-semibold text-white/90">
+                <h3 className="mt-3.5 font-ui text-[14px] font-semibold text-white/90">
                   {c.title}
-                </h4>
+                </h3>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-white/45">
                   {c.body}
                 </p>

@@ -35,6 +35,11 @@ const COLUMNS = [
   },
 ];
 
+const LEGAL = [
+  { label: "Privacy", to: "/privacy" },
+  { label: "Terms", to: "/terms" },
+];
+
 const SOCIALS = [
   { icon: GithubIcon, label: "GitHub", href: CONTACT.github },
   { icon: XIcon, label: "X", href: CONTACT.twitter },
@@ -106,9 +111,12 @@ export function Footer() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35">
+              {/* h2, not h3: the footer renders on pages whose body has no
+                  h2 at all (the 404), and an h1 followed by an h3 is a
+                  hierarchy jump on every one of them. */}
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35">
                 {col.title}
-              </h4>
+              </h2>
               <ul className="mt-4 flex flex-col gap-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}>
@@ -136,14 +144,18 @@ export function Footer() {
             >
               Report a vulnerability
             </a>
-            {["Privacy", "Terms", "Status"].map((l) => (
-              <a
-                key={l}
-                href="/#faq"
+            {/* These used to all point at /#faq. Search engines and, more to
+                the point, anyone looking for the privacy policy expect real
+                pages here. "Status" is gone until there is a status page to
+                link to. */}
+            {LEGAL.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
                 className="text-[12px] text-white/30 transition-colors hover:text-white/70"
               >
-                {l}
-              </a>
+                {l.label}
+              </Link>
             ))}
           </div>
         </div>
