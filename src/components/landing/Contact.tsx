@@ -56,12 +56,22 @@ export function Contact() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
 
-  const set = (k: keyof typeof EMPTY, v: string) =>
+  const set = (k: keyof typeof EMPTY, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
+    /*
+     * Typing again after a send means they are writing a second message, so
+     * drop the "sent" banner and re-enable the button. Without this the form
+     * stayed disabled forever and there was no way to send another.
+     */
+    if (status === "sent" || status === "error" || status === "demo") {
+      setStatus("idle");
+      startedAt.current = Date.now();
+    }
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (status === "sending" || status === "sent") return;
+    if (status === "sending") return;
 
     setStatus("sending");
     const res = await submitContactRequest({
@@ -79,7 +89,12 @@ export function Contact() {
       setStatus(res.reason === "rejected" ? "sent" : "demo");
       return;
     }
-    setForm(EMPTY);
+    /*
+     * Keep who they are, clear only what they said. Someone sending a second
+     * question should not have to retype their name and email, and leaving
+     * the old message in the box invites accidentally sending it twice.
+     */
+    setForm((f) => ({ ...f, message: "" }));
     setStatus("sent");
   }
 
