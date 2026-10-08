@@ -11,15 +11,15 @@ import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 const TEAM = [
   {
     name: "Francis Cordor",
-    role: "CEO",
+    role: "CEO, Vibeployed",
     affiliation: "Founder, Francordsoft",
     photo: "/team/francis-cordor.jpg",
     linkedin: "https://www.linkedin.com/in/francis-cordor-96a40338",
   },
   {
     name: "Shivam R",
-    role: "Founder and CTO",
-    affiliation: "Engineering and AI",
+    role: "Founder and CTO, Vibeployed",
+    affiliation: null,
     photo: "/team/shivam-r.jpg",
     linkedin: null,
   },
@@ -47,7 +47,7 @@ export function Team() {
           blurb="A small team that has run this problem from both sides: the deployment that has to ship, and the bill that arrives afterwards."
         />
 
-        <StaggerGroup className="mx-auto mt-14 grid max-w-3xl gap-4 sm:grid-cols-2">
+        <StaggerGroup className="mx-auto mt-14 grid max-w-2xl gap-4 sm:grid-cols-2">
           {TEAM.map((m) => (
             <StaggerItem key={m.name}>
               <article className="group h-full overflow-hidden rounded-2xl bg-white/[0.025] ring-hairline">
@@ -72,7 +72,9 @@ export function Team() {
                       {m.name}
                     </h3>
                     <p className="mt-1 text-[13px] font-medium text-white/70">{m.role}</p>
-                    <p className="mt-0.5 text-[12.5px] text-white/40">{m.affiliation}</p>
+                    {m.affiliation && (
+                      <p className="mt-0.5 text-[12.5px] text-white/40">{m.affiliation}</p>
+                    )}
                   </div>
 
                   {m.linkedin && (
