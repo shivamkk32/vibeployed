@@ -8,6 +8,7 @@ import { CostExplorer } from "../components/landing/CostExplorer";
 import { Security } from "../components/landing/Security";
 import { Pricing } from "../components/landing/Pricing";
 import { Faq } from "../components/landing/Faq";
+import { Team } from "../components/landing/Team";
 import { Contact } from "../components/landing/Contact";
 import { FinalCta } from "../components/landing/FinalCta";
 import { Footer } from "../components/Footer";
@@ -50,6 +51,7 @@ export function Landing() {
         <Security />
         <Pricing />
         <Faq />
+        <Team />
         <Contact />
         <FinalCta />
       </main>
